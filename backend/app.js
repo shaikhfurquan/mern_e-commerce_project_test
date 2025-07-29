@@ -1,0 +1,24 @@
+import express from 'express'
+import morgan from 'morgan'
+import cors from 'cors'
+import productRouter from './routes/product.route.js'
+import { errorHandleMiddleware } from './middlewares/error.middleware.js'
+
+const app = express()
+
+//express-middlewares
+app.use(morgan('dev'))
+app.use(cors())
+app.use(express.json())
+
+
+//routes
+app.use('/api/v1/products', productRouter)
+
+
+// error middleware
+app.use(errorHandleMiddleware)
+
+
+export default app
+
