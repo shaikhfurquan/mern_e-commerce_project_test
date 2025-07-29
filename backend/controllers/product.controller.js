@@ -1,5 +1,6 @@
 import { handleAsyncError } from "../middlewares/handleAsyncError.js";
 import ProductModel from "../models/product.model.js";
+import ApiFunctionality from "../utils/api.functionality.js";
 import HandleError from "../utils/handleError.js";
 
 
@@ -14,7 +15,10 @@ export const addProduct = handleAsyncError(async (req, res, next) => {
 
 
 export const getAllProducts = handleAsyncError(async (req, res, next) => {
-    const products = await ProductModel.find()
+
+    const apiFunctionality = new ApiFunctionality(ProductModel.find(), req.query).search()
+
+    const products = await apiFunctionality.query
 
     res.status(200).json({
         success: true,
