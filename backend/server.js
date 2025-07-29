@@ -1,14 +1,19 @@
 import app from './app.js'
-import express from 'express'
-import cors from 'cors'
 import dotenv from 'dotenv'
-import morgan from 'morgan'
 import connectDB from './config/db.js'
 
 
 
 dotenv.config()
 connectDB()
+
+
+// handeling the uncaught exception errors
+process.on('uncaughtException', (err) => {
+    console.log(`Error : ${err.message}`);
+    console.log(`Server is shutting down due to uncaught exception errors`);
+    process.exit(1);
+});
 
 
 // handeling the promise rejection errors , shutting down server
