@@ -15,8 +15,9 @@ export const addProduct = handleAsyncError(async (req, res, next) => {
 
 
 export const getAllProducts = handleAsyncError(async (req, res, next) => {
-
-    const apiFunctionality = new ApiFunctionality(ProductModel.find(), req.query).search().filter()
+    
+    const resultPerPage = 3
+    const apiFunctionality = new ApiFunctionality(ProductModel.find(), req.query).search().filter().pagination(resultPerPage)
 
     const products = await apiFunctionality.query
 
