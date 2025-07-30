@@ -16,7 +16,7 @@ export const addProduct = handleAsyncError(async (req, res, next) => {
 
 export const getAllProducts = handleAsyncError(async (req, res, next) => {
 
-    const apiFunctionality = new ApiFunctionality(ProductModel.find(), req.query).search()
+    const apiFunctionality = new ApiFunctionality(ProductModel.find(), req.query).search().filter()
 
     const products = await apiFunctionality.query
 
