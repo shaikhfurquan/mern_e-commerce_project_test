@@ -1,7 +1,6 @@
 import { handleAsyncError } from "../middlewares/handleAsyncError.js";
 import ProductModel from "../models/product.model.js";
 import UserModel from "../models/user.model.js";
-import ApiFunctionality from "../utils/api.functionality.js";
 import HandleError from "../utils/handleError.js";
 import { sendJwtToken } from "../utils/sendJwtToken.js";
 
@@ -39,4 +38,17 @@ export const loginUser = handleAsyncError(async (req, res, next) => {
     }
 
     sendJwtToken(user, 200, res)
+})
+
+
+export const logoutUser = handleAsyncError(async (req, res, next) => {
+
+    const options = {
+        expires: new Date(Date.now()),
+        httpOnly: true
+    }
+    res.cookie('token', null, options).json({
+        success: true,
+        message: "User logout successfully."
+    })
 })
