@@ -59,6 +59,11 @@ userSchema.pre('save', async function (next) {
     }
 });
 
+// Verifying the password
+userSchema.methods.verifyPassword =async function(userEnteredPassword){
+    return await bcrypt.compare(userEnteredPassword , this.password)
+}
+
 // Generating the token 
 userSchema.methods.generatejwtToken = function () {
     return jwt.sign({ _id: this._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRESIN })

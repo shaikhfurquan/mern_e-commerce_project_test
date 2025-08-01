@@ -3,6 +3,7 @@ import ProductModel from "../models/product.model.js";
 import UserModel from "../models/user.model.js";
 import ApiFunctionality from "../utils/api.functionality.js";
 import HandleError from "../utils/handleError.js";
+import { sendJwtToken } from "../utils/sendJwtToken.js";
 
 
 export const registerUser = handleAsyncError(async (req, res, next) => {
@@ -17,10 +18,25 @@ export const registerUser = handleAsyncError(async (req, res, next) => {
             url: "temp cloud url",
         }
     })
-    const token = await user.generatejwtToken()
-    res.status(201).json({
-        success: true,
-        token,
-        user
-    });
+    sendJwtToken(user, 201, res)
+})
+
+
+export const loginUser = handleAsyncError(async (req, res, next) => {
+
+    const { email, password } = req.body
+    if (!email || !password) {
+        return next(new HandleError("Email or password cannot be empty", 400))
+    }
+    const user = await UserModel.findOne({ email }).select('+password')
+    if (!user) {
+        return next(new HandleError("Invalid Email or password.", 401))
+    }
+
+    const isPasswordValid = await user.verifyPassword(password)
+    if (!isPasswordValid) {
+        return next(new HandleError("Invalid Credentials.", 401))
+    }
+
+    sendJwtToken(user, 200, res)
 })
