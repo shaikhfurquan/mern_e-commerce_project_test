@@ -17,7 +17,8 @@ export const errorHandleMiddleware = (err, req, res, next) => {
     res.status(err.statusCode).json({
         success: false,
         message: err.message,
-        stack: process.env.NODE_ENV === "development" ? err.stack : undefined // 🧠
+        stack: err.stack?.split('\n')[1]?.trim(),
+        // stack: process.env.NODE_ENV === "development" ? err.stack : undefined // 🧠,
     });
 };
 
