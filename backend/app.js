@@ -3,6 +3,7 @@ import morgan from 'morgan'
 import cors from 'cors'
 import productRouter from './routes/product.route.js'
 import { errorHandleMiddleware } from './middlewares/error.middleware.js'
+import userRouter from './routes/user.route.js'
 
 const app = express()
 
@@ -14,6 +15,7 @@ app.use(express.json())
 
 //routes
 app.use('/api/v1/products', productRouter)
+app.use('/api/v1/user', userRouter)
 
 
 // error middleware
