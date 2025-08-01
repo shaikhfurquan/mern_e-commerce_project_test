@@ -17,8 +17,10 @@ export const registerUser = handleAsyncError(async (req, res, next) => {
             url: "temp cloud url",
         }
     })
+    const token = await user.generatejwtToken()
     res.status(201).json({
         success: true,
+        token,
         user
     });
 })
