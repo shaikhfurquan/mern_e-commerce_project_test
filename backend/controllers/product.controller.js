@@ -5,7 +5,7 @@ import HandleError from "../utils/handleError.js";
 
 
 export const addProduct = handleAsyncError(async (req, res, next) => {
-
+    req.body.addedByUserId = req.user._id
     const product = await ProductModel.create(req.body)
     res.status(201).json({
         success: true,
