@@ -52,3 +52,31 @@ export const logoutUser = handleAsyncError(async (req, res, next) => {
         message: "User logout successfully."
     })
 })
+
+
+export const requestPasswordReset = handleAsyncError(async (req, res, next) => {
+
+    const user = await UserModel.findOne({ email: req.body.email })
+    if (!user) {
+        return next(new HandleError("User doesn't exists", 400))
+    }
+    let resetToken;
+    try {
+        resetToken = user.generatePasswordResetToken()
+        await user.save({ validateBeforeSave: false })
+    } catch (error) {
+        return next(new HandleError("Could not save reset token please try again later", 500))
+    }
+
+    const resetPasswordUrl = `http://localhost/api/v1/reset/${resetTokene}`
+    const message = `Use the following link to reset your password : ${resetPasswordUrl}. \n\n . This link will expire in 30 minutes. \n\n If you didn't request a password reset, Please ingore this message`
+
+    try {
+
+    } catch (error) {
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+        await user.save({ validateBeforeSave: false })
+        return next(new HandleError("Email Could not send. please try again later", 500))
+    }
+})
