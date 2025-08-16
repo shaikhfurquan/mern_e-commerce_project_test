@@ -1,5 +1,6 @@
 import express from 'express';
-import { loginUser, logoutUser, registerUser, requestPasswordReset, resetPassword } from '../controllers/user.controller.js';
+import { getUserProfileDetails, loginUser, logoutUser, registerUser, requestPasswordReset, resetPassword } from '../controllers/user.controller.js';
+import { isUserAuthenticated } from '../middlewares/isAuth.middleware.js';
 
 
 
@@ -10,5 +11,6 @@ userRouter.post('/login', loginUser)
 userRouter.post('/logout', logoutUser)
 userRouter.post('/password/forgot', requestPasswordReset)
 userRouter.post('/reset/:token', resetPassword)
+userRouter.get('/profile', isUserAuthenticated, getUserProfileDetails)
 
 export default userRouter;
