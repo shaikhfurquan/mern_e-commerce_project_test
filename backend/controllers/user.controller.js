@@ -43,6 +43,17 @@ export const loginUser = handleAsyncError(async (req, res, next) => {
 })
 
 
+export const getUserProfileDetails = handleAsyncError(async (req, res, next) => {
+
+    const user = req.user
+    res.status(200).json({
+        success: true,
+        user
+    });
+
+})
+
+
 export const logoutUser = handleAsyncError(async (req, res, next) => {
 
     const options = {
@@ -129,12 +140,26 @@ export const resetPassword = handleAsyncError(async (req, res, next) => {
 })
 
 
-export const getUserProfileDetails = handleAsyncError(async (req, res, next) => {
+export const updatePassword = handleAsyncError(async (req, res, next) => {
 
-    const user = req.user
-    res.status(200).json({
+    const { oldPassword, newPassword, confirmNewPassword } = req.body
+    const user = await UserModel.findById(req.user._id).select("+password")
+
+
+    const isPasswordMatch = await user.verifyPassword(oldPassword)
+    if (!isPasswordMatch) {
+        return next(new HandleError("Invalid old password", 400))
+    }
+
+
+    if (newPassword !== confirmNewPassword) {
+        return next(new HandleError("New password and confirm password do not match", 400))
+    }
+
+    user.password = newPassword
+    await user.save()
+      res.status(200).json({
         success: true,
-        user
-    });
-
+        message: 'Password updated successfully'
+    })
 })
