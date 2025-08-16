@@ -2,7 +2,9 @@ import { handleAsyncError } from "../middlewares/handleAsyncError.js";
 import ProductModel from "../models/product.model.js";
 import UserModel from "../models/user.model.js";
 import HandleError from "../utils/handleError.js";
+import { sendEmail } from "../utils/sendEmail.js";
 import { sendJwtToken } from "../utils/sendJwtToken.js";
+import crypto from 'crypto'
 
 
 export const registerUser = handleAsyncError(async (req, res, next) => {
@@ -68,9 +70,27 @@ export const requestPasswordReset = handleAsyncError(async (req, res, next) => {
         return next(new HandleError("Could not save reset token please try again later", 500))
     }
 
-    const resetPasswordUrl = `http://localhost/api/v1/reset/${resetTokene}`
-    const message = `Use the following link to reset your password : ${resetPasswordUrl}. \n\n . This link will expire in 30 minutes. \n\n If you didn't request a password reset, Please ingore this message`
+    const resetPasswordUrl = `http://localhost/api/v1/reset/${resetToken}`
+    // const message = `Use the following link to reset your password : ${resetPasswordUrl}. \n\n . This link will expire in 30 minutes. \n\n If you didn't request a password reset, Please ingore this message`
 
+    const message = `
+        <p>🔐 Use the following link to reset your password:</p>
+        <p><a href="${resetPasswordUrl}">${resetPasswordUrl}</a></p>
+        <p>⏳ <strong>This link will expire in 30 minutes.</strong></p>
+        <p>❗If you didn't request a password reset, please ignore this message.</p>
+        `;
+
+
+    // sending the email
+    await sendEmail({
+        email: user.email,
+        subject: `Password Reset Request`,
+        message
+    })
+    res.status(200).json({
+        success: true,
+        message: `Email is sent to ${user.email} successfully`
+    })
     try {
 
     } catch (error) {
@@ -80,3 +100,32 @@ export const requestPasswordReset = handleAsyncError(async (req, res, next) => {
         return next(new HandleError("Email Could not send. please try again later", 500))
     }
 })
+
+
+export const resetPassword = handleAsyncError(async (req, res, next) => {
+
+    const { token } = req.params
+    const resetPasswordToken = crypto.createHash("sha256").update(token).digest("hex")
+    // console.log(resetPasswordToken);
+
+    const user = await UserModel.findOne({
+        resetPasswordToken,
+        resetPasswordExpire: { $gt: Date.now() }
+    })
+    if (!user) {
+        return next(new HandleError('Reset password token is invalid or has been expired.', 400));
+    }
+
+    const { password, confirmPassword } = req.body
+    if (password !== confirmPassword) {
+        return next(new HandleError('Password and confirm password does not match', 400))
+    }
+
+    user.password = password
+    user.resetPasswordToken = undefined
+    user.resetPasswordExpire = undefined
+    await user.save({ validateBeforeSave: false })
+    sendJwtToken(user, 200, res)
+})
+
+
