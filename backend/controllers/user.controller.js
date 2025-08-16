@@ -158,8 +158,29 @@ export const updatePassword = handleAsyncError(async (req, res, next) => {
 
     user.password = newPassword
     await user.save()
-      res.status(200).json({
+    res.status(200).json({
         success: true,
         message: 'Password updated successfully'
+    })
+})
+
+
+export const updateUserProfile = handleAsyncError(async (req, res, next) => {
+
+    const { name, email } = req.body
+    const updateUserDetails = {
+        name,
+        email
+    }
+    const user = await UserModel.findByIdAndUpdate(
+        req.user._id,
+        updateUserDetails, {
+        new: true,
+        runValidators: true
+    })
+    res.status(200).json({
+        success: true,
+        message: "profile updated successfully",
+        user
     })
 })
