@@ -1,5 +1,5 @@
 import express from 'express';
-import { adminGetUsersListInfo, getUserProfileDetails, loginUser, logoutUser, registerUser, requestPasswordReset, resetPassword, updatePassword, updateUserProfile } from '../controllers/user.controller.js';
+import { adminGetSingleUserInfo, adminGetUsersListInfo, getUserProfileDetails, loginUser, logoutUser, registerUser, requestPasswordReset, resetPassword, updatePassword, updateUserProfile } from '../controllers/user.controller.js';
 import { isUserAuthenticated, roleBasedAccess } from '../middlewares/isAuth.middleware.js';
 
 
@@ -15,5 +15,6 @@ userRouter.post('/reset/:token', resetPassword)
 userRouter.post('/update/password', isUserAuthenticated, updatePassword)
 userRouter.post('/update/profile', isUserAuthenticated, updateUserProfile)
 userRouter.get('/admin/users-list', isUserAuthenticated, roleBasedAccess('admin'), adminGetUsersListInfo)
+userRouter.get('/admin/user/:userId', isUserAuthenticated, roleBasedAccess('admin'), adminGetSingleUserInfo)
 
 export default userRouter;

@@ -196,3 +196,17 @@ export const adminGetUsersListInfo = handleAsyncError(async (req, res, next) => 
         users
     })
 })
+
+
+// Admin - Getting the single user information
+export const adminGetSingleUserInfo = handleAsyncError(async (req, res, next) => {
+
+    const user = await UserModel.findById(req.params.userId)
+    if (!user) {
+        return next(new HandleError("User not found with this id", 400))
+    }
+    res.status(200).json({
+        success: true,
+        user
+    })
+})
