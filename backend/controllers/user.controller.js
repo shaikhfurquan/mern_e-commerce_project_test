@@ -184,3 +184,15 @@ export const updateUserProfile = handleAsyncError(async (req, res, next) => {
         user
     })
 })
+
+
+// Admin - Getting the user information
+export const adminGetUsersListInfo = handleAsyncError(async (req, res, next) => {
+
+    const users = await UserModel.find()
+    res.status(200).json({
+        success: true,
+        usersCount: users.length,
+        users
+    })
+})
