@@ -89,3 +89,18 @@ export const deleteProduct = handleAsyncError(async (req, res, next) => {
         message: "Product deleted successfully"
     });
 })
+
+
+// Admin - Getting the all products
+export const getAdminProduct = handleAsyncError(async (req, res, next) => {
+    const products = await ProductModel.find()
+    if (!products) {
+        return next(new HandleError("Product Not Found", 404))
+
+    }
+    res.status(200).json({
+        success: true,
+        productsCount: products.length,
+        products
+    });
+})
