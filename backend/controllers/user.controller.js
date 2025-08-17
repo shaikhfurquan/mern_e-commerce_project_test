@@ -210,3 +210,26 @@ export const adminGetSingleUserInfo = handleAsyncError(async (req, res, next) =>
         user
     })
 })
+
+
+
+// Admin - Changing/updating the user role
+export const adminUpdateUserRole = handleAsyncError(async (req, res, next) => {
+
+    const { role } = req.body
+    const newUserData = {
+        role
+    }
+    const user = await UserModel.findByIdAndUpdate(req.params.userId, newUserData, {
+        new: true,
+        runValidators: true
+    })
+    if (!user) {
+        return next(new HandleError("User does not exists", 400))
+    }
+
+    res.status(200).json({
+        success: true,
+        user
+    })
+})
