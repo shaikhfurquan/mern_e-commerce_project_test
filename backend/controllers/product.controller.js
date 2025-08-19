@@ -153,10 +153,91 @@ export const getProductReviews = handleAsyncError(async (req, res, next) => {
     }
     res.status(200).json({
         success: true,
-        reviews : product.reviews
+        reviews: product.reviews
     });
 })
 
+
+
+// Delete product review
+export const deleteProductReview = handleAsyncError(async (req, res, next) => {
+    const { reviewId, productId } = req.query
+
+    const product = await ProductModel.findById(productId)
+    if (!product) {
+        return next(new HandleError("Product Not Found", 404))
+    }
+
+    // Find the review by reviewId
+    const reviewToDelete = product.reviews.find(review => review._id.toString() === reviewId.toString())
+
+    if (!reviewToDelete) {
+        return next(new HandleError("Review Not Found", 404))
+    }
+
+    // Check if the logged-in user is the one who created the review
+    if (reviewToDelete.user.toString() !== req.user._id.toString()) {
+        return next(new HandleError("You can only delete your own review", 403))
+    }
+
+    // Delete the review
+    const reviews = product.reviews.filter(review => review._id.toString() !== reviewId.toString())
+
+    // Calculate the new average rating
+    let avgSum = 0;
+    reviews.forEach(review => {
+        avgSum += review.rating
+    })
+
+    const ratings = reviews.length > 0 ? avgSum / reviews.length : 0
+    const numberOfReviews = reviews.length
+
+    // Update the product with the new reviews, ratings, and number of reviews
+    await ProductModel.findByIdAndUpdate(productId, {
+        reviews,
+        ratings,
+        numberOfReviews
+    }, { new: true, runValidators: true })
+
+    res.status(200).json({
+        success: true,
+        message: "Review deleted successfully"
+    })
+})
+
+
+// export const deleteProductReview = handleAsyncError(async (req, res, next) => {
+
+//     const { reviewId, productId } = req.query
+
+//     const product = await ProductModel.findById(productId)
+//     if (!product) {
+//         return next(new HandleError("Product Not Found", 404))
+//     }
+
+//     const reviews = product.reviews.filter(review => review._id.toString() !== reviewId.toString())
+
+//     // calculating the average rating
+//     let avgSum = 0;
+//     reviews.forEach(review => {
+//         avgSum += review.rating
+//     })
+
+//     const ratings = reviews.length > 0 ? avgSum / reviews.length : 0
+//     const numberOfReviews = reviews.length
+//     await ProductModel.findByIdAndUpdate(productId, {
+//         reviews,
+//         ratings,
+//         numberOfReviews
+//     }, { new: true, runValidators: true })
+
+
+
+//     res.status(200).json({
+//         success: true,
+//         message: "Review deleted successfully"
+//     })
+// })
 
 
 // Admin - Getting the all products

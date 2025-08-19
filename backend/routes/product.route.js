@@ -1,5 +1,5 @@
 import express from 'express';
-import { addProduct, getAllProducts, updateProduct, deleteProduct, getSingleProduct, getAdminProduct, createAndUpdateReviewForProduct, getProductReviews } from '../controllers/product.controller.js';
+import { addProduct, getAllProducts, updateProduct, deleteProduct, getSingleProduct, getAdminProduct, createAndUpdateReviewForProduct, getProductReviews, deleteProductReview } from '../controllers/product.controller.js';
 import { isUserAuthenticated, roleBasedAccess } from '../middlewares/isAuth.middleware.js';
 
 
@@ -13,6 +13,7 @@ productRouter.delete('/admin/delete/:productId', isUserAuthenticated, roleBasedA
 productRouter.get('/admin/get-all', isUserAuthenticated, roleBasedAccess('admin'), getAdminProduct);
 productRouter.put('/review', isUserAuthenticated, createAndUpdateReviewForProduct);
 productRouter.get('/get-review', getProductReviews);
+productRouter.delete('/delete-review', isUserAuthenticated , deleteProductReview);
 
 
 export default productRouter;
