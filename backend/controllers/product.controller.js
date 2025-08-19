@@ -91,6 +91,55 @@ export const deleteProduct = handleAsyncError(async (req, res, next) => {
 })
 
 
+// creating and updating the reviews for product
+export const createAndUpdateReviewForProduct = handleAsyncError(async (req, res, next) => {
+
+    const { rating, comment, productId } = req.body
+    const review = {
+        user: req.user._id,
+        name: req.user.name,
+        rating: Number(rating),
+        comment
+    }
+    const product = await ProductModel.findById(productId)
+
+    // Check if the user has already reviewed the product
+    const reviewExists = product.reviews.find(review => review.user.toString() === req.user._id.toString())
+
+    if (reviewExists) {
+        // Loop through reviews and update the existing review by the current user
+        product.reviews.forEach(review => {
+            if (review.user.toString() === req.user._id.toString()) {
+                review.rating = rating // Update the rating
+                review.comment = comment // Update the comment
+            }
+        })
+    } else {
+        // If no review from the user, push a new review to the array
+        product.reviews.push(review)
+    }
+
+    // Calculate total number of reviews and average rating for the product
+    product.numberOfReviews = product.reviews.length;
+
+    // Sum up all ratings and calculate the average
+    let avgSum = 0;
+    product.reviews.forEach(review => {
+        avgSum += review.rating;
+    });
+    // Ensure rating is 0 if no reviews exist
+    product.rating = product.reviews.length > 0 ? avgSum / product.reviews.length : 0;
+
+
+    // Save the product document, bypassing validation (since review-related validation might not be needed)
+    await product.save({ validateBeforeSave: false })
+    res.status(200).json({
+        success: true,
+        product
+    })
+})
+
+
 // Admin - Getting the all products
 export const getAdminProduct = handleAsyncError(async (req, res, next) => {
     const products = await ProductModel.find()
