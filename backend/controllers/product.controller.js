@@ -102,6 +102,10 @@ export const createAndUpdateReviewForProduct = handleAsyncError(async (req, res,
         comment
     }
     const product = await ProductModel.findById(productId)
+    if (!product) {
+        return next(new HandleError("Product Not Found", 404))
+
+    }
 
     // Check if the user has already reviewed the product
     const reviewExists = product.reviews.find(review => review.user.toString() === req.user._id.toString())
@@ -138,6 +142,21 @@ export const createAndUpdateReviewForProduct = handleAsyncError(async (req, res,
         product
     })
 })
+
+
+// Getting the product reviews
+export const getProductReviews = handleAsyncError(async (req, res, next) => {
+    const product = await ProductModel.findById(req.query.productId)
+    if (!product) {
+        return next(new HandleError("Product Not Found", 404))
+
+    }
+    res.status(200).json({
+        success: true,
+        reviews : product.reviews
+    });
+})
+
 
 
 // Admin - Getting the all products
