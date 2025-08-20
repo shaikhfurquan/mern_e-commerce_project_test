@@ -84,9 +84,69 @@ export const getAllOrders = handleAsyncError(async (req, res, next) => {
 
     res.status(200).json({
         success: true,
-        allOrdersCount: allOrders.length, 
+        allOrdersCount: allOrders.length,
         totalAmount,
         allOrders
     })
 
 })
+
+
+// Admin -  update order status
+export const updateOrderStatus = handleAsyncError(async (req, res, next) => {
+    const order = await OrderModel.findById(req.params.orderId);
+
+    if (!order) {
+        return next(new HandleError("Order not found", 404));
+    }
+
+    if (order.orderStatus === 'Delivered') {
+        return next(new HandleError("This order has already been delivered", 400));
+    }
+
+    // // Update stock for each product
+    // await Promise.all(
+    //     order.orderItems.map(item => updateQuantity(item.product, item.quantity))
+    // );
+
+    // // Update order status
+    // order.orderStatus = req.body.status;
+
+    // if (order.orderStatus === 'Delivered') {
+    //     order.deliveredAt = Date.now();
+    // }
+
+    // Only reduce stock if the new status is 'Delivered'
+    if (req.body.status === 'Delivered') {
+        await Promise.all(
+            order.orderItems.map(item => updateQuantity(item.product, item.quantity))
+        );
+
+        order.deliveredAt = Date.now();
+    }
+
+    // Update order status
+    order.orderStatus = req.body.status;
+
+
+    // Save the updated order
+    await order.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+        success: true,
+        message: "Order status updated successfully",
+        order
+    });
+});
+
+// Helper function to update stock
+async function updateQuantity(productId, quantity) {
+    const product = await ProductModel.findById(productId);
+    if (!product) {
+        // Instead of using `next`, throw an error directly
+        throw new HandleError("Product not found", 404);
+    }
+
+    product.stock -= quantity;
+    await product.save({ validateBeforeSave: false });
+}
