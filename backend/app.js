@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser'
 import productRouter from './routes/product.route.js'
 import { errorHandleMiddleware } from './middlewares/error.middleware.js'
 import userRouter from './routes/user.route.js'
-import orderRouter from './routes/user.route.js'
+import orderRouter from './routes/order.route.js'
 
 const app = express()
 
